@@ -8,7 +8,7 @@ This Docker image is based on the `wait-for-it` tool, which is used to wait for 
 To build the Docker image, run the following command:
 
 ```bash
-sudo docker build -t wait-for-it .
+docker build -t wait-for-it .
 ```
 
 ## Run the Docker Container
@@ -16,7 +16,7 @@ sudo docker build -t wait-for-it .
 Once the image is built, you can run the container with:
 
 ```bash
-sudo docker run --rm wait-for-it
+docker run -it --rm wait-for-it /bin/bash
 ```
 
 # Use wait-for-it to wait for the service to be ready before continuing

@@ -2,6 +2,7 @@ PYTHON := python
 module:=wait_for_it
 project:=wait-for-it
 version:=$(shell $(PYTHON) -c 'import sys, os; sys.path.insert(0, os.path.abspath(".")); print(__import__("${module}").__version__)')
+IMAGE_NAME=wait-for-it
 
 .PHONY: list
 list help:
@@ -94,3 +95,15 @@ publish upload: test clean build check release
 .PHONY: upload-test
 upload-test: test clean build check
 	@$(PYTHON) -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+
+# Build the Docker Image
+.PHONY: docker-build
+docker-build:
+	@echo "Building Docker image..."
+	docker build -t $(IMAGE_NAME) .
+
+# Run the Docker Container
+.PHONY: docker-up
+docker-up:
+	@echo "Starting Docker container..."
+	docker run -it --rm $(IMAGE_NAME) /bin/bash

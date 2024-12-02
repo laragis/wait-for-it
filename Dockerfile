@@ -7,7 +7,7 @@
 ########################################################
 
 # Base image with Python
-FROM python:3.11-slim as python-base
+FROM python:3.11-slim AS python-base
 
 # Set the timezone to America/New_York
 ENV TZ=Asia/Ho_Chi_Minh
@@ -37,7 +37,7 @@ WORKDIR /app
 # BUILDER-BASE
 # Used to build deps + create our virtual environment
 ########################################################
-FROM python-base as builder-base
+FROM python-base AS builder-base
 
 RUN apt-get update \
     && apt-get install --no-install-recommends -y curl \
@@ -48,42 +48,27 @@ RUN apt-get update \
 # Copy only setup.py for efficient caching
 COPY setup.py ./
 
+# install runtime deps to VIRTUAL_ENV
+RUN --mount=type=cache,target=/root/.cache \
+    pip install --no-cache-dir .
+
 WORKDIR /app
 
 # Copy project files
 COPY . ./
 
 ########################################################
-# DEVELOPMENT
-# Image used during development / testing
-########################################################
-
-FROM builder-base as development
-
-RUN apt-get update \
-    && apt-get install -y git zsh exa && \
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh) --keep-zshrc" && \
-    echo yes | bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh)"
-
-RUN echo '\n# ZSH Plugins' >> ~/.zshrc && \
-    echo "zinit light spaceship-prompt/spaceship-prompt" >> ~/.zshrc && \
-    echo "zinit light zsh-users/zsh-syntax-highlighting" >> ~/.zshrc && \
-    echo "zinit light zsh-users/zsh-autosuggestions" >> ~/.zshrc && \
-    echo "zinit light zsh-users/zsh-completions" >> ~/.zshrc && \
-    echo '\n# ZSH Snippet' >> ~/.zshrc && \
-    echo "zinit snippet https://raw.githubusercontent.com/laragis/zsh-snippets/main/bash_aliases.sh" >> ~/.zshrc
-
-
-WORKDIR /app
-
-########################################################
 # PRODUCTION
 # Final image used for runtime
 ########################################################
-FROM python-base as production
+FROM python-base AS production
 
 WORKDIR /app
 COPY . ./
 
-# Run wait_for_it
-CMD ["pip", "install", "."]
+# install runtime deps to VIRTUAL_ENV
+RUN --mount=type=cache,target=/root/.cache \
+    pip install --no-cache-dir .
+
+# Run bash
+CMD ["/bin/bash"]
