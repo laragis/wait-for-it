@@ -2,7 +2,9 @@ PYTHON := python
 module:=wait_for_it
 project:=wait-for-it
 version:=$(shell $(PYTHON) -c 'import sys, os; sys.path.insert(0, os.path.abspath(".")); print(__import__("${module}").__version__)')
+ORG_NAME=ttungbmt
 IMAGE_NAME=wait-for-it
+IMAGE_TAG=latest
 
 .PHONY: list
 list help:
@@ -100,10 +102,16 @@ upload-test: test clean build check
 .PHONY: docker-build
 docker-build:
 	@echo "Building Docker image..."
-	docker build -t $(IMAGE_NAME) .
+	docker build -t $(ORG_NAME)/$(IMAGE_NAME):$(IMAGE_TAG) --target production -f Dockerfile .
 
 # Run the Docker Container
 .PHONY: docker-up
 docker-up:
 	@echo "Starting Docker container..."
 	docker run -it --rm $(IMAGE_NAME) /bin/bash
+
+# Push the Docker Image
+.PHONY: docker-push
+docker-push:
+	@echo "Pushing Docker image..."
+	docker push $(ORG_NAME)/$(IMAGE_NAME):$(IMAGE_TAG)
