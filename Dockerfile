@@ -7,10 +7,10 @@
 ########################################################
 
 # Base image with Python
-FROM python:3.11-slim AS python-base
+FROM bitnami/python:3.11 AS python-base
 
 # Set the timezone to America/New_York
-ENV TZ=Asia/Ho_Chi_Minh
+ENV TZ=UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Set environment variables for Python 
@@ -30,8 +30,8 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Prepare virtual env
 RUN python -m venv $VIRTUAL_ENV
 
-RUN mkdir -p /app
-WORKDIR /app
+RUN mkdir -p /usr/app
+WORKDIR /usr/app
 
 ########################################################
 # BUILDER-BASE
@@ -52,7 +52,7 @@ COPY setup.py ./
 RUN --mount=type=cache,target=/root/.cache \
     pip install --no-cache-dir .
 
-WORKDIR /app
+WORKDIR /usr/app
 
 # Copy project files
 COPY . ./
@@ -63,7 +63,7 @@ COPY . ./
 ########################################################
 FROM python-base AS production
 
-WORKDIR /app
+WORKDIR /usr/app
 COPY . ./
 
 # install runtime deps to VIRTUAL_ENV
@@ -71,4 +71,4 @@ RUN --mount=type=cache,target=/root/.cache \
     pip install --no-cache-dir .
 
 # Run bash
-CMD ["/bin/bash"]
+USER 1001
