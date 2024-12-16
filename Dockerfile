@@ -31,9 +31,10 @@ ENV \
     # Specifies the directory where Pip caches its data
     PIP_CACHE_DIR=/root/.cache/pip \
     # Path to the virtual environment
-    VIRTUAL_ENV="/venv" \
-    # Prepend the virtual environment to the PATH
-    PATH="/venv/bin:$PATH"
+    VIRTUAL_ENV="/opt/venv"
+
+# Prepend the virtual environment to the PATH
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Create a virtual environment in the specified directory
 RUN python -m venv ${VIRTUAL_ENV}
@@ -49,7 +50,11 @@ FROM python-base AS builder-base
 
 # Update apt package manager and install curl (used for network operations)
 RUN apt-get update \
-    && apt-get install --no-install-recommends -y curl make neovim zsh \
+    && apt-get install --no-install-recommends -y \
+    curl \
+    make \
+    neovim \
+    zsh \
     # Clean up unused files to reduce image size
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
     && rm -rf /var/lib/apt/lists/*

@@ -38,7 +38,15 @@ MANIFEST
 .python-version
 
 # github
+.git/
 .github/
+.gitignore
+.gitattributes
 
 # Sphinx documentation
 docs/
+
+# Other files
+*.gif
+*.png
+*.jpg
